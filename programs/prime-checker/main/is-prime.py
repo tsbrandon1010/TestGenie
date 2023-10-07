@@ -1,4 +1,3 @@
-#NF
 import math
 def is_prime(num: int) -> bool:
     '''Check if a number (num) is prime or not.'''
