@@ -22,8 +22,6 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 @click.option('-t', '--test', is_flag=True, help='Include this flag if you want your unit-test tested for you')
 def generate_test(input, output, retry_attempts, test):
         
-    print(test)    
-
     # need to add a check that the file exists, or use the build in click path/file type
     with open(input, 'r') as f:
         lines = f.readlines()
