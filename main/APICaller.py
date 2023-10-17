@@ -1,4 +1,6 @@
 import openai
+from dotenv import load_dotenv
+import os
 import json
 # Just create the interface and allow the MockAPI and OpenAI tests to define their own versions of generate prompt?
 
@@ -73,13 +75,15 @@ class MockApiCaller(ApiCallerInterface):
         return response
 
 class OpenAiApiCaller(ApiCallerInterface):
-    def __init__(self, api_key, model):
-        self.api_key = api_key
+    def __init__(self, model):
+        load_dotenv()
+        openai.api_key = os.getenv('OPENAI_API_KEY')
         self.model = model
 
     def query(self, prompt):
         response = openai.ChatCompletion.create(
             model=self.model,
-            messages=[{"role": "user", "content": f"{prompt}. Only respond with code as plain text."}]
+            messages=[{"role": "user", "content": prompt}]
         ) 
+        
         return response
