@@ -34,3 +34,60 @@ We should now be able to use the tool:
 ```-i```: The path of the file for which the tool will generate a unit test.
 <br>```-o```: A path to the file where the generated unit test will be saved.
 <br>```-r```: The maximum number of times to re-generate the unit test if the test fails.
+
+### Running through examples
+There is an example program we are going to use called ```is-prime.py``` that is located in ```~/programs/prime-checker/main```
+```
+import math
+def is_prime(num: int) -> bool:
+    '''Check if a number (num) is prime or not.'''
+    if num > 1:
+        for i in range(2, int(num/2)+1):
+            if (num % i) == 0:
+                return False
+        else:
+            return True
+    else:
+        return False
+```
+
+To create a unit test for this simple example, we can do the following:
+<br>```python auto_test.py -i ~/programs/prime-checker/main/is-prime.py -o ~/programs/prime-checker -r 0```
+
+The generated test might look like the following:
+```
+import unittest
+import math
+
+import math
+def is_prime(num: int) -> bool:
+    '''Check if a number (num) is prime or not.'''
+    if num > 1:
+        for i in range(2, int(num/2)+1):
+            if (num % i) == 0:
+                return False
+        else:
+            return True
+    else:
+        return False
+
+class TestIsPrime(unittest.TestCase):
+    # Test for prime numbers
+    def test_prime_numbers(self):
+        self.assertTrue(is_prime(2))
+    
+    # Test for non-prime numbers
+    def test_non_prime_numbers(self):
+        self.assertFalse(is_prime(0))
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Common Problems:
+**TLDR:** If you want the highest level of accuracy with your generated unit tests, it is recommended that you
+specify at least 1 retry attempt (```-r 1```).
+
+A common problem with the current version of the test generator is that it will forget to write the function
+you are testing in the unit test, or attempt to import the function from an invalid path. Setting ```-r``` to a value > 1
+will normally catch this, but you might have to import or define the function in the generated unit test yourself. 
