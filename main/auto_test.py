@@ -71,8 +71,7 @@ def parse_result(result, retry_attempts, output_file):
 @click.option('-i', '--input-file', help='The input file to the program you would like to create unit tests for', required=True)
 @click.option('-o', '--output-file', help='The output file where you would like to save the resulting unit test', required=True)
 @click.option('-r', '--retry-attempts', type=click.IntRange(0, 3, clamp=True), default=0, help='The number of times you would like the tool to retry generating a unit test if the generated test fails', required=False)
-@click.option('-t', '--test', is_flag=True, help='Include this flag if you want your unit-test tested for you')
-def generate_test(input_file, output_file, retry_attempts, test):
+def generate_test(input_file, output_file, retry_attempts):
         
     # need to add a check that the file exists, or use the build in click path/file type
     input_file = read_file(input_file)
@@ -85,13 +84,6 @@ def generate_test(input_file, output_file, retry_attempts, test):
     spinner.stop()
 
     filt_response = filter_response(response)
-    
-    if not test:
-        print(f'Your test was generated, but not run. \nExiting...')
-        with open(output_file, 'w') as f:
-            f.write(filt_response)
-        
-        sys.exit()
 
     # write the unit test to a python file. run it, if the tests fail re-prompt the LLM
     test_result = run_test(filt_response, output_file)
