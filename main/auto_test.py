@@ -1,4 +1,5 @@
 import subprocess
+import ast
 import re
 import sys
 from halo import Halo
@@ -9,11 +10,7 @@ def read_file(file):
     with open(file, 'r') as f:
         lines = f.readlines()
 
-    file = ""
-    for line in lines:
-        file += line
-
-    return file
+    return lines
 
 # need to add a check that the file exists, or use the build in click path/file type
 def create_prompt(input_file): 
@@ -43,8 +40,12 @@ def recreate_promt(failed_test, failed_test_result, input_file):
     return prompt
 
 def filter_response(response):
-    filtered_response = re.split('```python|```', response['choices'][0]['message']['content'])    
-    return filtered_response[1]
+    filtered_response = re.split('```python|```', response['choices'][0]['message']['content'])
+    
+    if len(filtered_response) == 1:
+        return filtered_response[0]
+    else:
+        return filtered_response[1]
 
 def run_test(response, output_file):
     with open(output_file, 'w') as f:
@@ -66,20 +67,81 @@ def parse_result(result, retry_attempts, output_file):
         else:
             return False
 
+def extract_imports(parsed_ast):
+    imports = []
+    for node in ast.walk(parsed_ast):
+        if type(node) == ast.Import or type(node) == ast.ImportFrom:
+            imports.append(node.lineno - 1)
+
+    return imports
+
+def extract_functions(parsed_ast):
+    functions = []
+    for node in ast.walk(parsed_ast):
+        if type(node) == ast.FunctionDef:
+            
+            func_range = (node.lineno - 1, node.end_lineno)
+            functions.append(func_range)
+
+    return functions
+
 
 @click.command()
 @click.option('-i', '--input-file', help='The input file to the program you would like to create unit tests for', required=True)
 @click.option('-o', '--output-file', help='The output file where you would like to save the resulting unit test', required=True)
 @click.option('-r', '--retry-attempts', type=click.IntRange(0, 3, clamp=True), default=0, help='The number of times you would like the tool to retry generating a unit test if the generated test fails', required=False)
-def generate_test(input_file, output_file, retry_attempts):
+@click.option('-s', '--sparse', is_flag=True, default=False, help='include this flag if you want to test a specific unit')
+def generate_test(input_file, output_file, retry_attempts, sparse):
         
-    # need to add a check that the file exists, or use the build in click path/file type
-    input_file = read_file(input_file)
+    if sparse:
+        content = read_file(input_file)
+        parsed_ast = ast.parse("".join(content))
+
+        imports = extract_imports(parsed_ast)
+        functions = extract_functions(parsed_ast)
+
+        print("Which functions would you like to write tests for? ", end="")
+        print("If multiple, seperate with a comma: \nExample: 1, 2, 4")
+        for j, i in enumerate(functions):
+            print(f"{j + 1}: (line {i[0]})", content[i[0]])
+
+        user_input = input("> ").split(',')
+
+        for i in imports:
+            input_file += content[i]
+
+        selected_functions = []
+        for i in user_input:
+            print(i)
+            try:
+                if int(i) > 0 and int(i) - 1 < len(functions):
+                    selected_functions.append(int(i))
+            except:
+                pass
+
+        print(f"Generating tests for: \n{selected_functions}")
+        usr_continue = input("Would you like to continue? [Y/n] \n> ")
+        if usr_continue.lower() != 'y':
+            sys.exit()
+
+        input_file = ""
+        for i in selected_functions:
+            input_file += "".join(content[functions[i - 1][0]:functions[i - 1][1]])
+
+    else:
+        lines = read_file(input_file)
+
+        input_file = "" 
+        for line in lines:
+            input_file += line
+
+    print(input_file)
+
 
     spinner = Halo(text='Generating Unit Test...', spinner='dots')
     spinner.start()
-    prompt = create_prompt(input_file)
-    apiCaller = OpenAiApiCaller(model='gpt-4')
+    prompt = create_prompt(input_file)    
+    apiCaller = OpenAiApiCaller(model='gpt-3.5-turbo')
     response = apiCaller.query(prompt)
     spinner.stop()
 
