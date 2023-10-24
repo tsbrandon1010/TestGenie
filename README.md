@@ -1,5 +1,6 @@
-# LLM-Unit-Tests
- 
+# TestGenie
+Accelerate your test driven development by using the power of AI to automatically write unit tests for your code.
+
 ## Getting Started:
 
 Assuming that you have a supported Python installation (3.x), you can start by 
@@ -29,11 +30,14 @@ Within the ```~/LLM-Unit-Tests/main``` directory, there is a file called ```.env
 ![image](https://github.com/tsbrandon1010/LLM-Unit-Tests/assets/15933213/9ac8d712-a72f-4690-8341-2f2ddca2c4e9)
 
 We should now be able to use the tool:
-<br>```python auto_test.py -i <input> -o <output> -r <max retries>```
+<br>```python auto_test.py -i <input> -o <output> (-r <max retries>) (-s)```
 
 ```-i```: The path of the file for which the tool will generate a unit test.
 <br>```-o```: A path to the file where the generated unit test will be saved.
-<br>```-r```: The maximum number of times to re-generate the unit test if the test fails.
+<br>```-r```: The maximum number of times to re-generate the unit test if the test fails (optional).
+<br>```-s```: Sparse tests. By default, the program will generate a 
+unit test for the entire file that is passed. Include this flag if you would like to
+pick and choose the functions to generate tests for (optional). **NOTE: CURRENTLY ONLY SUPPORTS PYTHON**
 
 ### Running through examples
 There is an example program we are going to use called ```is-prime.py``` that is located in ```~/programs/prime-checker/main```
