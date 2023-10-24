@@ -25,7 +25,7 @@ After downloading the tool and package dependencies, you must create an API key 
 
 ![Screenshot 2023-10-18 122012](https://github.com/tsbrandon1010/LLM-Unit-Tests/assets/15933213/e079c7ad-2e7c-4ced-add5-457aecf3e68f)
 
-Within the ```~/LLM-Unit-Tests/main``` directory, there is a file called ```.env```. This is where you will put your OpenAI API key (your key will go within the quotations).
+Within the ```~/LLM-Unit-Tests/main``` directory, create a file called ```.env```. This is where you will put your OpenAI API key (your key will go within the quotations).
 
 ![image](https://github.com/tsbrandon1010/LLM-Unit-Tests/assets/15933213/9ac8d712-a72f-4690-8341-2f2ddca2c4e9)
 
