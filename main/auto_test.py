@@ -160,10 +160,10 @@ def generate_test(input_file, output_file, retry_attempts, language, sparse):
     response = apiCaller.query(prompt)
     spinner.stop()
 
-    filt_response = filter_response(response)
+    filt_response = filter_response(response, language)
 
     # write the unit test to a python file. run it, if the tests fail re-prompt the LLM
-    test_result = run_test(filt_response, output_file)
+    test_result = run_test(filt_response, output_file, language)
     parsed_result = parse_result(test_result, retry_attempts, output_file)
 
     current_retry_attempts = 0
@@ -178,8 +178,8 @@ def generate_test(input_file, output_file, retry_attempts, language, sparse):
         response = apiCaller.query(prompt)
         spinner.stop()
 
-        filt_response = filter_response(response)
-        test_result = run_test(filt_response, output_file)
+        filt_response = filter_response(response, language)
+        test_result = run_test(filt_response, output_file, language)
         parsed_result = parse_result(test_result, retry_attempts, output_file)
 
     print(f"A passing unit test could not be found in the allotted number of retry attempts: {retry_attempts}")
