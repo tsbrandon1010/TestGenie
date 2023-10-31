@@ -15,8 +15,8 @@ def read_file(file):
 # need to add a check that the file exists, or use the build in click path/file type
 def create_prompt(input_file): 
     prompt = f"""
-    Write a unit test using unittest for the following program. Aim for 100% test coverage. Put each test case in its own test function. 
-    Make sure to define each function being unit tested in the python file (do not import the function being tested): 
+    Write a unit test for the following program. Aim for 100% test coverage. Put each test case in its own test function. 
+    Make sure to define each function being unit tested in the file (do not import the function being tested): 
 
     {input_file}
     """
@@ -39,19 +39,30 @@ def recreate_promt(failed_test, failed_test_result, input_file):
     
     return prompt
 
-def filter_response(response):
-    filtered_response = re.split('```python|```', response['choices'][0]['message']['content'])
+def filter_response(response, language):
+    
+    # csharp
+    if language == 'python':
+        lang = 'python'
+    elif language.lower() == 'c#':
+        lang = 'csharp'
+    
+    filtered_response = re.split(f'```{lang}|```', response['choices'][0]['message']['content'])
     
     if len(filtered_response) == 1:
         return filtered_response[0]
     else:
         return filtered_response[1]
 
-def run_test(response, output_file):
+def run_test(response, output_file, language):
     with open(output_file, 'w') as f:
         f.write(response)
     
-    unit_test_output = subprocess.run(['python', output_file], capture_output=True, check=False)
+    if language.lower() == 'python':
+        unit_test_output = subprocess.run(['python', output_file], capture_output=True, check=False)
+    elif language.lower() == 'c#':
+        unit_test_output = subprocess.run(['csc', output_file], capture_output=True, check=False)
+    
     return unit_test_output
 
 def parse_result(result, retry_attempts, output_file):
@@ -90,10 +101,14 @@ def extract_functions(parsed_ast):
 @click.option('-i', '--input-file', help='The input file to the program you would like to create unit tests for', required=True)
 @click.option('-o', '--output-file', help='The output file where you would like to save the resulting unit test', required=True)
 @click.option('-r', '--retry-attempts', type=click.IntRange(0, 3, clamp=True), default=0, help='The number of times you would like the tool to retry generating a unit test if the generated test fails', required=False)
-@click.option('-s', '--sparse', is_flag=True, default=False, help='include this flag if you want to test a specific unit')
-def generate_test(input_file, output_file, retry_attempts, sparse):
+@click.option('-l', '--language', type=click.Choice(['python', 'C#'], case_sensitive=False), help='The language of the file for which tests are being generated')
+@click.option('-s', '--sparse', is_flag=True, default=False, help='Include this flag if you want to test a specific unit')
+def generate_test(input_file, output_file, retry_attempts, language, sparse):
         
     if sparse:
+        if language.lower() == 'c#':
+            SystemExit("C# is not currently supported for sparse test generation. \nExiting...")
+        
         content = read_file(input_file)
         parsed_ast = ast.parse("".join(content))
 
@@ -145,10 +160,10 @@ def generate_test(input_file, output_file, retry_attempts, sparse):
     response = apiCaller.query(prompt)
     spinner.stop()
 
-    filt_response = filter_response(response)
+    filt_response = filter_response(response, language)
 
     # write the unit test to a python file. run it, if the tests fail re-prompt the LLM
-    test_result = run_test(filt_response, output_file)
+    test_result = run_test(filt_response, output_file, language)
     parsed_result = parse_result(test_result, retry_attempts, output_file)
 
     current_retry_attempts = 0
@@ -163,8 +178,8 @@ def generate_test(input_file, output_file, retry_attempts, sparse):
         response = apiCaller.query(prompt)
         spinner.stop()
 
-        filt_response = filter_response(response)
-        test_result = run_test(filt_response, output_file)
+        filt_response = filter_response(response, language)
+        test_result = run_test(filt_response, output_file, language)
         parsed_result = parse_result(test_result, retry_attempts, output_file)
 
     print(f"A passing unit test could not be found in the allotted number of retry attempts: {retry_attempts}")
