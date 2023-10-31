@@ -29,7 +29,11 @@ Within the ```~/LLM-Unit-Tests/main``` directory, create a file called ```.env``
 ![image](https://github.com/tsbrandon1010/TestGenie/assets/15933213/0ecccdda-63f5-4811-bd2f-d3307d330803)
 
 We should now be able to use the tool:
-<br>```python auto_test.py -i <input> -o <output> (-r <max retries>) (-s)```
+<br>```python auto_test.py -i <input> -o <output> (-r <max retries>) (-s) -l <language>```
+
+**Alternatively, you can use auto_test.exe in the ```/main/``` directory, and skip installing Python and the dependencies.**
+<br>```auto_test -i <input> -o <output> (-r <max retries>) (-s) -l <language>```
+
 
 ```-i```: The path of the file for which the tool will generate a unit test.
 <br>```-o```: A path to the file where the generated unit test will be saved.
@@ -37,6 +41,7 @@ We should now be able to use the tool:
 <br>```-s```: Sparse tests. By default, the program will generate a 
 unit test for the entire file that is passed. Include this flag if you would like to
 pick and choose the functions to generate tests for (optional). **NOTE: CURRENTLY ONLY SUPPORTS PYTHON**
+<br>```-l```: Specify whether your language (currently only supports Python and C#). 
 
 ### Running through examples
 There is an example program we are going to use called ```is-prime.py``` that is located in ```~/programs/prime-checker/main```
