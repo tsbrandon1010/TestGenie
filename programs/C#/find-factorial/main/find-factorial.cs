@@ -1,7 +1,22 @@
-public static int Factorial(int n)
+using System;
+
+class Progarm
 {
-    if (n <= 1)
-        return 1;
-    else
-        return n * Factorial(n - 1);
+    static void Main()
+    {
+        int n = 5;
+        int result = Factorial(n);
+        Console.WriteLine(result);
+    }
+
+    static int Factorial(int n)
+    {
+        if (n <= 1)
+            return 1;
+        else
+            return n * Factorial(n - 1);
+    }
 }
+
+
+
