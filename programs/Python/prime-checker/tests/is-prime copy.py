@@ -1,16 +1,5 @@
 import unittest
 
-def is_prime(num: int) -> bool:
-    '''Check if a number (num) is prime or not.'''
-    if num > 1:
-        for i in range(2, int(num/2)+1):
-            if (num % i) == 0:
-                return False
-        else:
-            return True
-    else:
-        return False
-
 class TestIsPrime(unittest.TestCase):
     
     def test_is_prime_positive(self):
@@ -38,6 +27,14 @@ class TestIsPrime(unittest.TestCase):
     
     def test_is_prime_large_numbers(self):
         self.assertTrue(is_prime(524287), "524287 is prime")
-        self.assertFalse(is_prime(82589932), "82589933 is not prime")
+        self.assertFalse(is_prime(82589933), "82589933 is not prime")
     
-unittest.main()
+    def test_is_prime_float(self):
+        self.assertFalse(is_prime(2.5), "2.5 is not prime")
+        self.assertFalse(is_prime(3.14), "3.14 is not prime")
+    
+    def test_is_prime_string(self):
+        self.assertFalse(is_prime("5"), "string '5' is not prime")
+        self.assertFalse(is_prime("hello"), "string 'hello' is not prime")
+
+unittest.main() 
